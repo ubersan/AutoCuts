@@ -1,15 +1,14 @@
-const electron = require('electron')
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
+const { app, BrowserWindow, Menu } = require('electron')
 
 const path = require('path')
 const url = require('url')
+const shell = require('electron').shell
 
 let mainWindow
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    width: 800,
+    width: 1000,
     height: 600,
     backgroundColor: '#ffffff',
     icon: `file://${__dirname}/dist/assets/logo.png`
@@ -26,6 +25,30 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  var menu = Menu.buildFromTemplate([
+    {
+      label: 'Menu',
+      submenu: [
+        { label: 'First Label' },
+        { 
+          label: 'Browse',
+          click() {
+            shell.openExternal('http://google.com')
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Exit',
+          click() {
+            app.quit()
+          }
+        }
+      ]
+    }
+  ])
+
+  Menu.setApplicationMenu(menu)
 }
 
 app.on('ready', createWindow)
