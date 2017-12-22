@@ -42,3 +42,5 @@ testem.log
 Thumbs.db
 
 auto-cuts-win32-x64/
+
+build/
