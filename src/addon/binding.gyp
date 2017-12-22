@@ -3,7 +3,7 @@
     {
       "target_name": "addon",
       "sources": [
-        "src/addon/addon.cc"
+        "addon.cc"
       ],
       "include_dirs": [
           "<!(node -e \"require('nan')\")"

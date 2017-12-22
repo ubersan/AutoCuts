@@ -5,3 +5,4 @@ interface NodeModule {
 }
 
 declare var testOut: any;
+declare var myAddon: any;

@@ -13,5 +13,6 @@ export class AppComponent {
   start() {
     console.log("start called")
     testOut();
+    console.log(myAddon.factorial(5))
   }
 }
