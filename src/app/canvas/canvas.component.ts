@@ -19,6 +19,8 @@ export class CanvasComponent implements OnInit {
   }
 
   ngOnInit() {
+    var vRows = myAddon.loadBunny();
+    console.log('Vrows = ', vRows);
   }
 
   init() {

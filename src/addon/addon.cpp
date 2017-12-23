@@ -1,6 +1,8 @@
 #include <cmath>
 #include <nan.h>
 
+#include "src/ImportMesh.hpp"
+
 // call node-gyp rebuild --target=1.7.10 --arch=x64 --dist-url=https://atom.io/download/atom-shell
 // when changing the addon.cc
 
@@ -26,8 +28,26 @@ NAN_METHOD(factorial) {
     info.GetReturnValue().Set(num);
 }
 
-void Init(v8::Local<v8::Object> exports) {  
-    NAN_EXPORT(exports, factorial);
+NAN_METHOD(loadBunny) {
+    ImportMesh* importer = new ImportMesh();
+
+    Eigen::MatrixXd V;
+    Eigen::MatrixXi F;
+
+    std::string filename = "C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off";
+    importer->readMatrices(filename, V, F);
+
+    v8::Local<v8::Number> num = Nan::New<v8::Number>(V.rows());
+
+    info.GetReturnValue().Set(num);
+
+    delete(importer);
+    importer = nullptr;
 }
 
-NODE_MODULE(example1, Init)
+void Init(v8::Local<v8::Object> exports) {  
+    NAN_EXPORT(exports, factorial);
+    NAN_EXPORT(exports, loadBunny);
+}
+
+NODE_MODULE(addon, Init)

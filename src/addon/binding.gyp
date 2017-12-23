@@ -3,10 +3,13 @@
     {
       "target_name": "addon",
       "sources": [
-        "addon.cc"
+        "addon.cpp",
+        "src/ImportMesh.cpp"
       ],
       "include_dirs": [
-          "<!(node -e \"require('nan')\")"
+          "<!(node -e \"require('nan')\")",
+          "../../../../libigl-master/include",
+          "../../../../eigen"
        ]
     }
   ]
