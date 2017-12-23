@@ -8,8 +8,8 @@ let mainWindow
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
+    width: 1400,
+    height: 800,
     backgroundColor: '#ffffff',
     icon: `file://${__dirname}/dist/assets/logo.png`
   })
