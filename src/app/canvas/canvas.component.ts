@@ -39,7 +39,12 @@ export class CanvasComponent implements OnInit {
 
     this.scene = new THREE.Scene();
 
-    var material = new THREE.MeshStandardMaterial( { color : 0x00cc00 } );
+    var material = new THREE.MeshPhongMaterial( {
+      color: 0xff0000,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
+    });
 
     var bunnyMesh = myAddon.loadBunny();
 
@@ -57,15 +62,23 @@ export class CanvasComponent implements OnInit {
       geometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
     }
 
-    //the face normals and vertex normals can be calculated automatically if not supplied above
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
 
     this.mesh = new THREE.Mesh( geometry, material );
     this.scene.add( this.mesh );
 
-    var light = new THREE.AmbientLight(0x404040); // soft white light
+    // wireframe
+    var geo = new THREE.EdgesGeometry( this.mesh.geometry ); // or WireframeGeometry
+    var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+    var wireframe = new THREE.LineSegments( geo, mat );
+    this.mesh.add(wireframe);
+
+    var light = new THREE.AmbientLight(0xffffff);
     this.scene.add(light);
+
+    var axesHelper = new THREE.AxesHelper(20);
+    this.scene.add(axesHelper);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
   }
