@@ -22,7 +22,8 @@
         "styles.css"
       ],
       "scripts": [
-        "myjslib.js"
+        "myjslib.js",
+        "../../../three.js-master-r89/build/three.min.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

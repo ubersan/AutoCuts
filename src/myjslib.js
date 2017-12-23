@@ -1,5 +1,5 @@
 function testOut() {
-    console.log("testOut called")
+    console.log("testOut called");
 }
 
-const myAddon = require('../src/addon/build/Release/addon.node')
+const myAddon = require('../src/addon/build/Release/addon.node');
