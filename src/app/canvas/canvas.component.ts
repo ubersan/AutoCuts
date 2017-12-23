@@ -35,15 +35,37 @@ export class CanvasComponent implements OnInit {
     document.body.appendChild( this.renderer.domElement );
 
     this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-    this.camera.position.z = 1000;
+    this.camera.position.z = 100;
 
     this.scene = new THREE.Scene();
 
-    var geometry = new THREE.BoxGeometry( 200, 200, 200 );
-    var material = new THREE.MeshNormalMaterial();
+    var material = new THREE.MeshStandardMaterial( { color : 0x00cc00 } );
+
+    var bunnyMesh = myAddon.loadBunny();
+
+    var numVertices = bunnyMesh[0][0];
+    var numFaces = bunnyMesh[0][1];
+
+    var geometry = new THREE.Geometry();
+    for (var i = 0; i < numVertices; ++i) {
+      var v = bunnyMesh[i + 1];
+      geometry.vertices.push(new THREE.Vector3(v[0]*100, v[1]*100, v[2]*100));
+    }
+
+    for (var i = 0; i < numFaces; ++i) {
+      var f = bunnyMesh[i + 1 + numVertices];
+      geometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
+    }
+
+    //the face normals and vertex normals can be calculated automatically if not supplied above
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
 
     this.mesh = new THREE.Mesh( geometry, material );
     this.scene.add( this.mesh );
+
+    var light = new THREE.AmbientLight(0x404040); // soft white light
+    this.scene.add(light);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
   }
@@ -52,7 +74,7 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(() => this.animate() );
 
     //this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.01;
+    //this.mesh.rotation.y += 0.01;
 
     this.renderer.render( this.scene, this.camera );
   }
