@@ -11,6 +11,7 @@ export class CanvasComponent implements OnInit {
   camera: any;
   renderer: any;
   scene: any;
+  controls: any;
 
   constructor() {
     this.init();
@@ -21,28 +22,29 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
-    this.camera.position.z = 1;
+    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( this.renderer.domElement );
+
+    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+    this.camera.position.z = 1000;
 
     this.scene = new THREE.Scene();
 
-    var geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+    var geometry = new THREE.BoxGeometry( 200, 200, 200 );
     var material = new THREE.MeshNormalMaterial();
 
     this.mesh = new THREE.Mesh( geometry, material );
     this.scene.add( this.mesh );
 
-    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
-    
-    document.body.appendChild( this.renderer.domElement );
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
   }
 
   animate() {
     requestAnimationFrame(() => this.animate() );
 
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.02;
+    //this.mesh.rotation.x += 0.01;
+    this.mesh.rotation.y += 0.01;
 
     this.renderer.render( this.scene, this.camera );
   }
