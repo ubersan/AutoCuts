@@ -37,9 +37,34 @@ NAN_METHOD(loadBunny) {
     std::string filename = "C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off";
     importer->readMatrices(filename, V, F);
 
-    v8::Local<v8::Number> num = Nan::New<v8::Number>(V.rows());
+    // v8::Local<v8::Number> num = Nan::New<v8::Number>(V.rows());
+    // info.GetReturnValue().Set(num);
 
-    info.GetReturnValue().Set(num);
+    auto result_list = Nan::New<v8::Array>();
+
+    auto obj = Nan::New<v8::Object>();
+    obj->Set(0, Nan::New<v8::Number>(V.rows()));
+    obj->Set(1, Nan::New<v8::Number>(F.rows()));
+    obj->Set(2, Nan::New<v8::Number>(0));
+    result_list->Set(0, obj);
+
+    for (auto i = 0; i < V.rows(); ++i) {
+        auto o = Nan::New<v8::Object>();
+        o->Set(0, Nan::New<v8::Number>(V(i, 0)));
+        o->Set(1, Nan::New<v8::Number>(V(i, 1)));
+        o->Set(2, Nan::New<v8::Number>(V(i, 2)));
+        result_list->Set(i + 1, o);
+    }
+
+    for (auto i = 0; i < F.rows(); ++i) {
+        auto o = Nan::New<v8::Object>();
+        o->Set(0, Nan::New<v8::Number>(F(i, 0)));
+        o->Set(1, Nan::New<v8::Number>(F(i, 1)));
+        o->Set(2, Nan::New<v8::Number>(F(i, 2)));
+        result_list->Set(i + 1 + V.rows(), o);
+    }
+
+    info.GetReturnValue().Set(result_list);
 
     delete(importer);
     importer = nullptr;

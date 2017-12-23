@@ -19,8 +19,14 @@ export class CanvasComponent implements OnInit {
   }
 
   ngOnInit() {
-    var vRows = myAddon.loadBunny();
-    console.log('Vrows = ', vRows);
+    var result = myAddon.loadBunny();
+
+    var meshInfo = result[0];
+
+    console.log('result', result);
+    console.log('meshInfo', meshInfo);
+    console.log('Vrows = ', meshInfo[0]);
+    console.log('Frows = ', meshInfo[1]);
   }
 
   init() {
