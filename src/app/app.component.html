@@ -1,1 +1,22 @@
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <span>Custom Toolbar</span>
+    </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-menu #rootMenu="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="subMenu">Power</button>
+    <button mat-menu-item>System settings</button>
+</mat-menu>
+
+<mat-menu #subMenu="matMenu">
+    <button mat-menu-item>Shut down</button>
+    <button mat-menu-item>Restart</button>
+    <button mat-menu-item>Hibernate</button>
+</mat-menu>
+
+<button mat-icon-button [matMenuTriggerFor]="rootMenu">
+    <mat-icon>more_vert</mat-icon>
+</button>
+
 <button mat-button (click)="start()">I work</button>
