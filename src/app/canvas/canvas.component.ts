@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { createScope } from '@angular/core/src/profile/wtf_impl';
+import { Component, OnInit, HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-canvas',
@@ -81,29 +80,28 @@ export class CanvasComponent implements OnInit {
     this.createScene();
   }
 
+  @HostListener('window:resize') onResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(window.innerWidth,window.innerHeight);
+  }
+
   createScene() {
     this.scene = new THREE.Scene();
 
     this.mesh = new THREE.Mesh(this.modelGeometry, this.modelMaterial);
-
     if (this.showWireframe) {
       this.mesh.add(this.wireframeMesh);
     }
-
     this.scene.add(this.mesh);
 
     this.scene.add(this.light);
-
-    var axesHelper = new THREE.AxesHelper(20);
-    this.scene.add(axesHelper);
+    this.scene.add(new THREE.AxesHelper(20));
   }
 
   animate() {
     requestAnimationFrame(() => this.animate() );
-
-    //this.mesh.rotation.x += 0.01;
-    //this.mesh.rotation.y += 0.01;
-
     this.renderer.render( this.scene, this.camera );
   }
 
