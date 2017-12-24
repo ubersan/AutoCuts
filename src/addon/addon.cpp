@@ -34,8 +34,14 @@ NAN_METHOD(loadBunny) {
     Eigen::MatrixXd V;
     Eigen::MatrixXi F;
 
-    std::string filename = "C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off";
-    importer->readMatrices(filename, V, F);
+    if (!info[0]->IsString()) {
+        Nan::ThrowTypeError("Argument should be a string");
+        return;
+    }
+
+    v8::String::Utf8Value param1(info[0]->ToString());
+    std::string filenamePath = std::string(*param1); 
+    importer->readMatrices(filenamePath, V, F);
 
     // v8::Local<v8::Number> num = Nan::New<v8::Number>(V.rows());
     // info.GetReturnValue().Set(num);

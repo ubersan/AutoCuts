@@ -1,5 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 
+import { ElectronService } from 'ngx-electron';
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -24,22 +26,36 @@ export class CanvasComponent implements OnInit {
 
   showWireframe = true;
 
-  constructor() {
+  meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
+
+  constructor(private _electronService: ElectronService) {
+    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.renderer.domElement);
+  }
+
+  ngOnInit() {
     this.init();
     this.animate();
   }
-
-  ngOnInit() { }
 
   toggleWireframe() {
     this.createScene();
   }
 
-  init() {
-    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( this.renderer.domElement );
+  loadMesh() {
+    this._electronService.remote.dialog.showOpenDialog({properties: ['openFile']}, files => this.test(files));
+  }
 
+  test(files: string[]) {
+    if (files.length == 1) {
+      this.meshFileName = files[0];
+      console.log('meshFileName now: ', this.meshFileName)
+      this.init();
+    }
+  }
+
+  init() {
     this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.z = 100;
 
@@ -50,10 +66,13 @@ export class CanvasComponent implements OnInit {
       polygonOffsetUnits: 1
     });
 
-    var bunnyMesh = myAddon.loadBunny();
-
+    var bunnyMesh = myAddon.loadBunny(this.meshFileName);
+  
     var numVertices = bunnyMesh[0][0];
     var numFaces = bunnyMesh[0][1];
+
+    console.log('Vrows: ', numVertices);
+    console.log('Frows: ', numFaces);
 
     this.modelGeometry = new THREE.Geometry();
     for (var i = 0; i < numVertices; ++i) {
@@ -101,8 +120,8 @@ export class CanvasComponent implements OnInit {
   }
 
   animate() {
-    requestAnimationFrame(() => this.animate() );
-    this.renderer.render( this.scene, this.camera );
+    requestAnimationFrame(() => this.animate());
+    this.renderer.render(this.scene, this.camera);
   }
 
 }

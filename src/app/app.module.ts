@@ -8,6 +8,7 @@ import { CanvasComponent } from './canvas/canvas.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material.module';
 
+import { NgxElectronModule } from 'ngx-electron';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { MaterialModule } from './material.module';
     BrowserModule,
     BrowserAnimationsModule,
     MaterialModule,
-    FormsModule
+    FormsModule,
+    NgxElectronModule
   ],
   providers: [],
   bootstrap: [
