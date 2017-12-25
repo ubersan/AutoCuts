@@ -7,18 +7,10 @@ import { MatSidenav } from '@angular/material/sidenav';
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.css']
+  styleUrls: ['./canvas.component.css'],
 })
 export class CanvasComponent implements OnInit {
-  @ViewChild('sidenav') sidenav: MatSidenav;
   @ViewChild('canvasContainer') canvasContainer: ElementRef;
-
-  reason = '';
-
-  close(reason: string) {
-    this.reason = reason;
-    this.sidenav.close();
-  }
 
   mesh: any;
 
