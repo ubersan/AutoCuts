@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ViewChild } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 
 import { ElectronService } from 'ngx-electron';
 
@@ -11,6 +11,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 })
 export class CanvasComponent implements OnInit {
   @ViewChild('sidenav') sidenav: MatSidenav;
+  @ViewChild('canvasContainer') canvasContainer: ElementRef;
 
   reason = '';
 
@@ -41,13 +42,16 @@ export class CanvasComponent implements OnInit {
 
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer( { antialias: true } );
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
   }
 
   ngOnInit() {
     this.init();
     this.animate();
+  }
+
+  ngAfterViewInit() {
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
   }
 
   toggleWireframe() {
