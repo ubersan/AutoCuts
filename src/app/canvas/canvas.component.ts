@@ -1,6 +1,8 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild } from '@angular/core';
 
 import { ElectronService } from 'ngx-electron';
+
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-canvas',
@@ -8,6 +10,14 @@ import { ElectronService } from 'ngx-electron';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements OnInit {
+  @ViewChild('sidenav') sidenav: MatSidenav;
+
+  reason = '';
+
+  close(reason: string) {
+    this.reason = reason;
+    this.sidenav.close();
+  }
 
   mesh: any;
 
