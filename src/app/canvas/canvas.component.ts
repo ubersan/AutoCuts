@@ -26,6 +26,7 @@ export class CanvasComponent implements OnInit {
 
   showWireframe = true;
 
+  // mesh to load on startup
   meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
 
   constructor(private _electronService: ElectronService) {
@@ -44,13 +45,20 @@ export class CanvasComponent implements OnInit {
   }
 
   loadMesh() {
-    this._electronService.remote.dialog.showOpenDialog({properties: ['openFile']}, files => this.test(files));
+    this._electronService.remote.dialog.showOpenDialog({
+      properties: [ 'openFile' ],
+      filters: [
+        { name: 'OFF-Files', extensions: ['off'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    },
+    files => this.callback_loadMesh(files));
   }
 
-  test(files: string[]) {
-    if (files.length == 1) {
+  callback_loadMesh(files: string[]) {
+    // currently only OFF-Files are supported
+    if (files && files[0].endsWith('.off')) {
       this.meshFileName = files[0];
-      console.log('meshFileName now: ', this.meshFileName)
       this.init();
     }
   }
@@ -70,9 +78,6 @@ export class CanvasComponent implements OnInit {
   
     var numVertices = bunnyMesh[0][0];
     var numFaces = bunnyMesh[0][1];
-
-    console.log('Vrows: ', numVertices);
-    console.log('Frows: ', numFaces);
 
     this.modelGeometry = new THREE.Geometry();
     for (var i = 0; i < numVertices; ++i) {
