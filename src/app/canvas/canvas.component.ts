@@ -22,12 +22,15 @@ export class CanvasComponent implements OnInit {
   wireframeMesh: any;
 
   camera: any;
+  camera2d: any;
 
   renderer: any;
   renderer2d: any;
   
   scene: any;
+
   controls: any;
+  controls2d: any;
 
   light: any;
 
@@ -115,6 +118,9 @@ export class CanvasComponent implements OnInit {
     this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.z = 100;
 
+    this.camera2d = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000 );
+    this.camera2d.position.z = 100;
+
     this.modelMaterial = new THREE.MeshPhongMaterial( {
       color: 0xff0000,
       polygonOffset: true,
@@ -148,6 +154,7 @@ export class CanvasComponent implements OnInit {
     this.light = new THREE.AmbientLight(0xffffff);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls2d = new THREE.OrbitControls(this.camera2d, this.renderer2d.domElement);
 
     this.createScene();
   }
@@ -155,6 +162,9 @@ export class CanvasComponent implements OnInit {
   @HostListener('window:resize') onResize() {
     this.camera.aspect = (window.innerWidth / 2) / (window.innerHeight * 0.8);
     this.camera.updateProjectionMatrix();
+
+    this.camera2d.aspect = (window.innerWidth / 2) / (window.innerHeight * 0.8);
+    this.camera2d.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
     this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
@@ -177,7 +187,7 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(() => this.animate());
 
     this.renderer.render(this.scene, this.camera);
-    this.renderer2d.render(this.scene, this.camera);
+    this.renderer2d.render(this.scene, this.camera2d);
   }
 
 }
