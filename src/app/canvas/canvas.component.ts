@@ -10,7 +10,8 @@ import { MatSidenav } from '@angular/material/sidenav';
   styleUrls: ['./canvas.component.css'],
 })
 export class CanvasComponent implements OnInit {
-  @ViewChild('canvasContainer') canvasContainer: ElementRef;
+  @ViewChild('canvas3dContainer') canvas3dContainer: ElementRef;
+  @ViewChild('canvas2dContainer') canvas2dContainer: ElementRef;
 
   mesh: any;
 
@@ -21,19 +22,57 @@ export class CanvasComponent implements OnInit {
   wireframeMesh: any;
 
   camera: any;
+
   renderer: any;
+  renderer2d: any;
+  
   scene: any;
   controls: any;
 
   light: any;
 
+  views: any;
+
   showWireframe = true;
+
+  divWidth: any;
 
   // mesh to load on startup
   meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
 
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+
+    this.renderer2d = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer2d.setPixelRatio(window.devicePixelRatio);
+
+    this.views = [
+      {
+        left: 0,
+        top: 0,
+        width: 0.5,
+        height: 1.0,
+        background: new THREE.Color(0.5, 0.5, 0.7),
+        eye: [0, 0, 100],
+        up: [0, 1, 0],
+        fov: 30
+      },
+      {
+        left: 0.5,
+        top: 0.5,
+        width: 0.5,
+        height: 1.0,
+        background: new THREE.Color(0.8, 0.3, 0.2),
+        eye: [0, 0, 100],
+        up: [0, 1, 0],
+        fov: 30
+      }
+    ]
+  }
+
+  hey(i) {
+    console.log('hey', i);
   }
 
   ngOnInit() {
@@ -42,8 +81,11 @@ export class CanvasComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
+    this.renderer.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
+    this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
+
+    this.canvas3dContainer.nativeElement.appendChild(this.renderer.domElement);
+    this.canvas2dContainer.nativeElement.appendChild(this.renderer2d.domElement);
   }
 
   toggleWireframe() {
@@ -70,7 +112,7 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+    this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.z = 100;
 
     this.modelMaterial = new THREE.MeshPhongMaterial( {
@@ -111,10 +153,11 @@ export class CanvasComponent implements OnInit {
   }
 
   @HostListener('window:resize') onResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.aspect = (window.innerWidth / 2) / (window.innerHeight * 0.8);
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth,window.innerHeight);
+    this.renderer.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
+    this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight * 0.8);
   }
 
   createScene() {
@@ -132,7 +175,9 @@ export class CanvasComponent implements OnInit {
 
   animate() {
     requestAnimationFrame(() => this.animate());
+
     this.renderer.render(this.scene, this.camera);
+    this.renderer2d.render(this.scene, this.camera);
   }
 
 }
