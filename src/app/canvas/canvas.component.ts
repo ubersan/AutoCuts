@@ -90,10 +90,10 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera.position.z = 3;
 
-    this.camera2d = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000);
+    this.camera2d = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera2d.position.z = 3;
 
     this.modelMaterial = new THREE.MeshPhongMaterial( {
