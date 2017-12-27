@@ -9,8 +9,6 @@ import { ElectronService } from 'ngx-electron';
 })
 export class CanvasComponent implements OnInit {
   @ViewChild('sidenavcontent') sidenavcontent: ElementRef;
-  //@ViewChild('canvas3dContainer') canvas3dContainer: ElementRef;
-  //@ViewChild('canvas2dContainer') canvas2dContainer: ElementRef;
 
   mesh: any;
 
@@ -43,10 +41,10 @@ export class CanvasComponent implements OnInit {
   meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
 
   constructor(private _electronService: ElectronService) {
-    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    this.renderer2d = new THREE.WebGLRenderer( { antialias: true } );
+    this.renderer2d = new THREE.WebGLRenderer({ antialias: true });
     this.renderer2d.setPixelRatio(window.devicePixelRatio);
   }
 
@@ -92,14 +90,14 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000 );
+    this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000);
     this.camera.position.z = 3;
 
-    this.camera2d = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000 );
+    this.camera2d = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 1, 10000);
     this.camera2d.position.z = 3;
 
     this.modelMaterial = new THREE.MeshPhongMaterial( {
-      color: 0xff0000,
+      color: 0xffffff,
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1
@@ -126,14 +124,15 @@ export class CanvasComponent implements OnInit {
     this.modelGeometry.computeVertexNormals();
     this.modelGeometry.normalize();
 
-    var geo = new THREE.EdgesGeometry( this.modelGeometry ); // or WireframeGeometry
-    var mat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 0.1 } );
-    this.wireframeMesh = new THREE.LineSegments( geo, mat );
+    var geo = new THREE.EdgesGeometry(this.modelGeometry);
+    var mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
+    this.wireframeMesh = new THREE.LineSegments(geo, mat);
 
     this.light = new THREE.AmbientLight(0xffffff);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.controls2d = new THREE.OrbitControls(this.camera2d, this.renderer2d.domElement);
+    this.controls2d.enableRotate = false;
 
     this.createScene();
   }
@@ -147,9 +146,6 @@ export class CanvasComponent implements OnInit {
 
     this.renderer.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
     this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
-
-    console.log('innerwidth: ', window.innerWidth);
-    console.log('innerheight: ', window.innerHeight);
   }
 
   createScene() {
@@ -162,6 +158,8 @@ export class CanvasComponent implements OnInit {
     this.scene.add(this.mesh);
 
     this.scene.add(this.light);
+
+    this.scene.background = new THREE.Color(0xaeaeae);
   }
 
   animate() {
