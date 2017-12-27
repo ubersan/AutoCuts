@@ -4,8 +4,5 @@
     <p><button mat-button (click)="loadMesh()" color="primary">Load Mesh</button></p>
   </mat-sidenav>
 
-  <mat-sidenav-content style="display: flex;">
-    <div #canvas3dContainer style="flex-grow: 1; width: 50%;  background-color: red;"></div>
-    <div #canvas2dContainer style="flex-grow: 1; width: 50%; background-color: blue;"></div>
-  </mat-sidenav-content>
+  <div #sidenavcontent style="display: flex; overflow: hidden"></div>
 </mat-sidenav-container>

@@ -11,8 +11,12 @@ function createWindow () {
     width: 1800,
     height: 950,
     backgroundColor: '#ffffff',
-    icon: `file://${__dirname}/dist/assets/logo.png`
+    icon: `file://${__dirname}/dist/assets/logo.png`,
+    //skipTaskbar: true,
+    //toolbar: false
   })
+
+  mainWindow.setMenu(null);
 
   mainWindow.loadURL(`file://${__dirname}/dist/index.html`)
 
@@ -26,7 +30,7 @@ function createWindow () {
     mainWindow = null
   })
 
-  var menu = Menu.buildFromTemplate([
+  /*var menu = Menu.buildFromTemplate([
     {
       label: 'Menu',
       submenu: [
@@ -48,7 +52,7 @@ function createWindow () {
     }
   ])
 
-  Menu.setApplicationMenu(menu)
+  Menu.setApplicationMenu(menu)*/
 }
 
 app.on('ready', createWindow)
