@@ -2,6 +2,10 @@ import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular
 
 import { ElectronService } from 'ngx-electron';
 
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import { Subscription } from 'rxjs/Subscription';
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -10,11 +14,14 @@ import { ElectronService } from 'ngx-electron';
 export class CanvasComponent implements OnInit {
   @ViewChild('sidenavcontent') sidenavcontent: ElementRef;
 
+  subscription: Subscription;
+
   mesh: any;
 
   modelGeometry: any;
   modelMaterial: any;
-  modelMesh: any;
+
+  selectMaterial: any;
   
   wireframeMesh: any;
 
@@ -37,8 +44,16 @@ export class CanvasComponent implements OnInit {
 
   divWidth: any;
 
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
   // mesh to load on startup
   meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
+
+  // TODO: Read this out
+  sideNavWidth = 103;
+
+  hitfaceIndex = null;
 
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -51,6 +66,31 @@ export class CanvasComponent implements OnInit {
   ngOnInit() {
     this.init();
     this.animate();
+
+    this.subscription = 
+         Observable.fromEvent(
+           this.renderer.domElement,
+           'mousedown')
+        .subscribe(e => {
+          var mouseevent: MouseEvent;
+          mouseevent = e as MouseEvent;
+          this.mouse.x = ((mouseevent.clientX - this.sideNavWidth) / this.renderer.domElement.clientWidth) * 2 - 1;
+          this.mouse.y = - (mouseevent.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
+          console.log('mouse:', this.mouse);
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+
+          var intersects = this.raycaster.intersectObjects(this.scene.children);
+          if (intersects.length > 0) {
+            this.hitfaceIndex = intersects[0].faceIndex;
+            this.mesh.geometry.faces[this.hitfaceIndex].materialIndex = 1;
+            this.mesh.geometry.groupsNeedUpdate = true;
+            console.log('new hitfaceidx: ', this.hitfaceIndex);
+          } else {
+            this.hitfaceIndex = null;
+          }
+          console.log('#ints: ', intersects.length);
+          console.log('ints: ', intersects);
+        });
   }
 
   // TODO: minus header bar
@@ -60,8 +100,6 @@ export class CanvasComponent implements OnInit {
     this.renderer.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
     this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
 
-    //this.canvas3dContainer.nativeElement.appendChild(this.renderer.domElement);
-    //this.canvas2dContainer.nativeElement.appendChild(this.renderer2d.domElement);
     this.sidenavcontent.nativeElement.appendChild(this.renderer.domElement);
     this.sidenavcontent.nativeElement.appendChild(this.renderer2d.domElement);
   }
@@ -98,6 +136,13 @@ export class CanvasComponent implements OnInit {
 
     this.modelMaterial = new THREE.MeshPhongMaterial( {
       color: 0xffffff,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
+    });
+
+    this.selectMaterial = new THREE.MeshPhongMaterial( {
+      color: 0xff0000,
       polygonOffset: true,
       polygonOffsetFactor: 1,
       polygonOffsetUnits: 1
@@ -151,7 +196,7 @@ export class CanvasComponent implements OnInit {
   createScene() {
     this.scene = new THREE.Scene();
 
-    this.mesh = new THREE.Mesh(this.modelGeometry, this.modelMaterial);
+    this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
     if (this.showWireframe) {
       this.mesh.add(this.wireframeMesh);
     }
@@ -165,6 +210,12 @@ export class CanvasComponent implements OnInit {
   animate() {
     requestAnimationFrame(() => this.animate());
 
+    // if (this.hitfaceIndex != null) {
+    //   this.modelGeometry.faces[this.hitfaceIndex].material.color = new THREE.Color(0xff0000);
+    //   console.log('face: ', this.modelGeometry.faces[this.hitfaceIndex]);
+    //   console.log('changed it! ', this.hitfaceIndex)
+    // }
+    
     this.renderer.render(this.scene, this.camera);
     this.renderer2d.render(this.scene, this.camera2d);
   }
