@@ -1,8 +1,16 @@
 <mat-sidenav-container>
-  <mat-sidenav #sidenav mode="side" opened="true" style="z-index: 3; overflow:visible;">
+  <mat-sidenav #sidenav mode="side" opened="true" style="z-index: 3; overflow:visible;" disableClose="true">
     <p><mat-checkbox [(ngModel)]="showWireframe" (change)="toggleWireframe()">Wireframe</mat-checkbox></p>
     <p><button mat-button (click)="loadMesh()" color="primary">Load Mesh</button></p>
+    <mat-form-field>
+      <mat-select [(value)]="drawingOption" (change)="selectChanged($event)">
+        <mat-option value="camera">Camera</mat-option>
+        <mat-option value="select">Select</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <!--p><button mat-button (click)="sidenav.toggle()" color="primary" style="position: absolute; top: 50%; left: 20px; z-index: 42;">Toggle Nav</button></p-->
+
   </mat-sidenav>
 
   <div #sidenavcontent style="display: flex; overflow: hidden; z-index: 2;"></div>
