@@ -59,7 +59,7 @@ export class CanvasComponent implements OnInit {
   mouse = new THREE.Vector2();
 
   // mesh to load on startup
-  meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\bunny.off';
+  meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\cube.off';
 
   hitfaceIndex = null;
 
@@ -107,7 +107,6 @@ export class CanvasComponent implements OnInit {
         var mouseevent = e as MouseEvent;
         this.mouse.x = ((mouseevent.clientX - this.sidenav._width) / this.renderer.domElement.clientWidth) * 2 - 1;
         this.mouse.y = - (mouseevent.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
-        console.log('mouse:', this.mouse);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         var intersects = this.raycaster.intersectObjects(this.scene.children);
@@ -155,6 +154,15 @@ export class CanvasComponent implements OnInit {
     }
   }
 
+  startSolver() {
+    var aa = myAddon.startSolver();
+    console.log(aa);
+  }
+
+  stopSolver() {
+    myAddon.stopSolver();
+  }
+
   init() {
     this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera.position.z = 3;
@@ -191,7 +199,7 @@ export class CanvasComponent implements OnInit {
     });
 
     var loadedMesh = myAddon.loadMeshWithSoup(this.meshFileName);
-  
+
     var numVertices = loadedMesh[0][0];
     var numFaces = loadedMesh[0][1];
     var numSoupVertices = loadedMesh[0][2];
@@ -283,6 +291,10 @@ export class CanvasComponent implements OnInit {
 
   animate() {
     requestAnimationFrame(() => this.animate());
+
+    if (myAddon.solverProgressed()) {
+      console.log("solver progressed");
+    }
 
     this.renderer.render(this.scene, this.camera);
     this.renderer2d.render(this.scene2d, this.camera2d);
