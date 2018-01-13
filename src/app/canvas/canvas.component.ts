@@ -20,13 +20,19 @@ export class CanvasComponent implements OnInit {
   subscription: Subscription;
 
   mesh: any;
+  mesh2d: any;
 
   modelGeometry: any;
   modelMaterial: any;
+  
+  model2dGeometry: any;
+  modelMaterial2d: any;
 
   selectMaterial: any;
+  selectMaterial2d: any;
   
   wireframeMesh: any;
+  wireframe2dMesh: any;
 
   camera: any;
   camera2d: any;
@@ -35,11 +41,13 @@ export class CanvasComponent implements OnInit {
   renderer2d: any;
   
   scene: any;
+  scene2d: any;
 
   controls: any;
   controls2d: any;
 
   light: any;
+  light2d: any;
 
   views: any;
 
@@ -65,18 +73,17 @@ export class CanvasComponent implements OnInit {
     this.renderer2d.setPixelRatio(window.devicePixelRatio);
   }
 
-  activeDrawingMode = "camera";
   selectChanged(event) {
     switch (event.value) {
       case "camera": {
-        this.activeDrawingMode = "camera";
+        this.drawingOption = "camera";
         this.unsubscribe();
         this.controls.enabled = true;
         this.controls2d.enabled = true;
         break;
       }
       case "select": {
-        this.activeDrawingMode = "select";
+        this.drawingOption = "select";
         this.subscribe();
         this.controls.enabled = false;
         this.controls2d.enabled = false;
@@ -88,7 +95,6 @@ export class CanvasComponent implements OnInit {
   ngOnInit() {
     this.init();
     this.animate();
-    //this.subscribe();
   }
 
   unsubscribe() {
@@ -109,12 +115,9 @@ export class CanvasComponent implements OnInit {
           this.hitfaceIndex = intersects[0].faceIndex;
           this.mesh.geometry.faces[this.hitfaceIndex].materialIndex = 1;
           this.mesh.geometry.groupsNeedUpdate = true;
-          console.log('new hitfaceidx: ', this.hitfaceIndex);
         } else {
           this.hitfaceIndex = null;
         }
-        console.log('#ints: ', intersects.length);
-        console.log('ints: ', intersects);
       });
   }
 
@@ -173,11 +176,31 @@ export class CanvasComponent implements OnInit {
       polygonOffsetUnits: 1
     });
 
-    // TODO: Rename loadBunny to loadMesh
-    var loadedMesh = myAddon.loadBunny(this.meshFileName);
+    this.modelMaterial2d = new THREE.MeshPhongMaterial( {
+      color: 0xffffff,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
+    });
+
+    this.selectMaterial2d = new THREE.MeshPhongMaterial( {
+      color: 0xff0000,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
+    });
+
+    var loadedMesh = myAddon.loadMeshWithSoup(this.meshFileName);
   
     var numVertices = loadedMesh[0][0];
     var numFaces = loadedMesh[0][1];
+    var numSoupVertices = loadedMesh[0][2];
+    var numSoupFaces = loadedMesh[0][3];
+
+    console.log('V: ', numVertices);
+    console.log('F: ', numFaces);
+    console.log('Vs: ', numSoupVertices);
+    console.log('Fs: ', numSoupFaces);
 
     this.modelGeometry = new THREE.Geometry();
     for (var i = 0; i < numVertices; ++i) {
@@ -190,15 +213,35 @@ export class CanvasComponent implements OnInit {
       this.modelGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
     }
 
+    this.model2dGeometry = new THREE.Geometry();
+    for (var i = 0; i < numSoupVertices; ++i) {
+      var v = loadedMesh[i + 1 + numVertices + numFaces];
+      this.model2dGeometry.vertices.push(new THREE.Vector3(v[0], v[1], v[2]));
+    }
+
+    for (var i = 0; i < numSoupFaces; ++i) {
+      var f = loadedMesh[i + 1 + numVertices + numFaces + numSoupVertices];
+      this.model2dGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
+    }
+
     this.modelGeometry.computeFaceNormals();
     this.modelGeometry.computeVertexNormals();
     this.modelGeometry.normalize();
+
+    this.model2dGeometry.computeFaceNormals();
+    this.model2dGeometry.computeVertexNormals();
+    this.model2dGeometry.normalize();
 
     var geo = new THREE.EdgesGeometry(this.modelGeometry);
     var mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
     this.wireframeMesh = new THREE.LineSegments(geo, mat);
 
+    var geo2d = new THREE.EdgesGeometry(this.model2dGeometry);
+    var mat2d = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
+    this.wireframe2dMesh = new THREE.LineSegments(geo2d, mat2d);
+
     this.light = new THREE.AmbientLight(0xffffff);
+    this.light2d = new THREE.AmbientLight(0xffffff);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.controls2d = new THREE.OrbitControls(this.camera2d, this.renderer2d.domElement);
@@ -220,23 +263,28 @@ export class CanvasComponent implements OnInit {
 
   createScene() {
     this.scene = new THREE.Scene();
-
     this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
     if (this.showWireframe) {
       this.mesh.add(this.wireframeMesh);
     }
     this.scene.add(this.mesh);
-
     this.scene.add(this.light);
-
     this.scene.background = new THREE.Color(0xaeaeae);
+
+    this.scene2d = new THREE.Scene();
+    this.mesh2d = new THREE.Mesh(this.model2dGeometry, [this.modelMaterial2d, this.selectMaterial2d]);
+    if (this.showWireframe) {
+      this.mesh2d.add(this.wireframe2dMesh);
+    }
+    this.scene2d.add(this.mesh2d);
+    this.scene2d.add(this.light2d);
+    this.scene2d.background = new THREE.Color(0xaeaeae);
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
 
     this.renderer.render(this.scene, this.camera);
-    this.renderer2d.render(this.scene, this.camera2d);
+    this.renderer2d.render(this.scene2d, this.camera2d);
   }
-
 }
