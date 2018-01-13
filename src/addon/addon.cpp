@@ -104,10 +104,32 @@ NAN_METHOD(solverProgressed) {
   info.GetReturnValue().Set(progressed);
 }
 
+NAN_METHOD(getUpdatedMesh) {
+  MatX2 Xnew;
+  solver_wrapper->solver->get_mesh(Xnew);
+
+  auto result_list = Nan::New<v8::Array>();
+
+  auto obj = Nan::New<v8::Object>();
+  obj->Set(0, Nan::New<v8::Number>(Xnew.rows()));
+  result_list->Set(0, obj);
+
+  for (auto i = 0; i < Xnew.rows(); ++i) {
+    auto o = Nan::New<v8::Object>();
+    o->Set(0, Nan::New<v8::Number>(Xnew(i, 0)));
+    o->Set(1, Nan::New<v8::Number>(Xnew(i, 1)));
+    o->Set(2, Nan::New<v8::Number>(0));
+    result_list->Set(i + 1, o);
+  }
+
+  info.GetReturnValue().Set(result_list);
+}
+
 void Init(v8::Local<v8::Object> exports) {
     NAN_EXPORT(exports, loadMeshWithSoup);
     NAN_EXPORT(exports, startSolver);
     NAN_EXPORT(exports, solverProgressed);
+    NAN_EXPORT(exports, getUpdatedMesh);
 }
 
 NODE_MODULE(addon, Init)

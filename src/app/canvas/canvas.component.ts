@@ -205,11 +205,6 @@ export class CanvasComponent implements OnInit {
     var numSoupVertices = loadedMesh[0][2];
     var numSoupFaces = loadedMesh[0][3];
 
-    console.log('V: ', numVertices);
-    console.log('F: ', numFaces);
-    console.log('Vs: ', numSoupVertices);
-    console.log('Fs: ', numSoupFaces);
-
     this.modelGeometry = new THREE.Geometry();
     for (var i = 0; i < numVertices; ++i) {
       var v = loadedMesh[i + 1];
@@ -222,6 +217,7 @@ export class CanvasComponent implements OnInit {
     }
 
     this.model2dGeometry = new THREE.Geometry();
+    this.modelGeometry.dynamic = true;
     for (var i = 0; i < numSoupVertices; ++i) {
       var v = loadedMesh[i + 1 + numVertices + numFaces];
       this.model2dGeometry.vertices.push(new THREE.Vector3(v[0], v[1], v[2]));
@@ -232,12 +228,12 @@ export class CanvasComponent implements OnInit {
       this.model2dGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
     }
 
-    this.modelGeometry.computeFaceNormals();
-    this.modelGeometry.computeVertexNormals();
+    //this.modelGeometry.computeFaceNormals();
+    //this.modelGeometry.computeVertexNormals();
     this.modelGeometry.normalize();
 
-    this.model2dGeometry.computeFaceNormals();
-    this.model2dGeometry.computeVertexNormals();
+    //this.model2dGeometry.computeFaceNormals();
+    //this.model2dGeometry.computeVertexNormals();
     this.model2dGeometry.normalize();
 
     var geo = new THREE.EdgesGeometry(this.modelGeometry);
@@ -293,7 +289,26 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(() => this.animate());
 
     if (myAddon.solverProgressed()) {
-      console.log("solver progressed");
+      console.log('update vertices');
+      // var updated2dVertices = myAddon.getUpdatedMesh();
+      // var numVerts = updated2dVertices[0][0]; // todo: stays the same, dont repeat here
+      // for (var i = 0; i < numVerts; ++i) {
+      //   var v = updated2dVertices[i + 1];
+      //   this.model2dGeometry.vertices[i] = new THREE.Vector3(v[0], v[1], v[2]);
+      // }
+      // this.model2dGeometry.verticesNeedUpdate = true;
+      this.scene2d.remove(this.mesh2d);
+      var geo = new THREE.Geometry();
+      geo.vertices = this.model2dGeometry.vertices;
+      geo.faces = this.model2dGeometry.faces;
+      geo.dynamic = true;
+      geo.verticesNeedUpdate = true;
+      for (var i = 0; i < geo.vertices.length; ++i) {
+        geo.vertices[i].x += 0.01;
+      }
+      var newmesh = new THREE.Mesh(geo, [this.modelMaterial2d, this.selectMaterial2d]);
+      this.mesh2d = newmesh;
+      this.scene2d.add(this.mesh2d);
     }
 
     this.renderer.render(this.scene, this.camera);
