@@ -265,6 +265,10 @@ export class CanvasComponent implements OnInit {
     this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
   }
 
+  @HostListener('window:keypress', ['$event']) keyPressed(event: KeyboardEvent) {
+    console.log('key = ', event.key);
+  }
+
   createScene() {
     this.scene = new THREE.Scene();
     this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
@@ -289,7 +293,6 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(() => this.animate());
 
     if (myAddon.solverProgressed()) {
-      console.log('update vertices');
       // var updated2dVertices = myAddon.getUpdatedMesh();
       // var numVerts = updated2dVertices[0][0]; // todo: stays the same, dont repeat here
       // for (var i = 0; i < numVerts; ++i) {
@@ -297,6 +300,7 @@ export class CanvasComponent implements OnInit {
       //   this.model2dGeometry.vertices[i] = new THREE.Vector3(v[0], v[1], v[2]);
       // }
       // this.model2dGeometry.verticesNeedUpdate = true;
+      var updated2dVertices = myAddon.getUpdatedMesh();
       this.scene2d.remove(this.mesh2d);
       var geo = new THREE.Geometry();
       geo.vertices = this.model2dGeometry.vertices;
@@ -304,8 +308,12 @@ export class CanvasComponent implements OnInit {
       geo.dynamic = true;
       geo.verticesNeedUpdate = true;
       for (var i = 0; i < geo.vertices.length; ++i) {
-        geo.vertices[i].x += 0.01;
+        var v = updated2dVertices[i+1];
+        geo.vertices[i].x = v[0];
+        geo.vertices[i].y = v[1];
+        geo.vertices[i].z = v[2];
       }
+      //geo.normalize();
       var newmesh = new THREE.Mesh(geo, [this.modelMaterial2d, this.selectMaterial2d]);
       this.mesh2d = newmesh;
       this.scene2d.add(this.mesh2d);
