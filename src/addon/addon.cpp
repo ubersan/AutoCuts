@@ -11,6 +11,8 @@
 
 // OR: rebuild the VS solution (prefered)
 
+enum class Param { LAMBDA, DELTA, BOUND, POSITION_WEIGHT };
+
 SolverWrapper* solver_wrapper;
 
 thread solver_thread;
@@ -125,11 +127,68 @@ NAN_METHOD(getUpdatedMesh) {
   info.GetReturnValue().Set(result_list);
 }
 
+static void update_energy_param(Param p, double value) {
+  switch (p)
+  {
+  case Param::LAMBDA:
+    solver_wrapper->set_lambda(value);
+    break;
+  case Param::DELTA:
+    solver_wrapper->set_delta(value);
+    break;
+  case Param::BOUND:
+    solver_wrapper->set_bound(value);
+    break;
+  case Param::POSITION_WEIGHT:
+    solver_wrapper->set_position_weight(value);
+    break;
+  default:
+    assert(false && "Unknown energy parameter");
+  }
+}
+
+NAN_METHOD(increaseLambda) {
+  if (solver_wrapper->solver->energy->lambda <= 0.98)
+  {
+    if (solver_wrapper->solver->energy->lambda >= 0.85)
+      update_energy_param(Param::LAMBDA, solver_wrapper->solver->energy->lambda + 0.01);
+    else if (solver_wrapper->solver->energy->lambda <= 0.9)
+      update_energy_param(Param::LAMBDA, solver_wrapper->solver->energy->lambda + 0.1);
+  }
+
+  info.GetReturnValue().Set(Nan::New<v8::Number>(solver_wrapper->solver->energy->lambda));
+}
+
+NAN_METHOD(decreaseLambda) {
+  if (solver_wrapper->solver->energy->lambda > 0.9)
+    update_energy_param(Param::LAMBDA, solver_wrapper->solver->energy->lambda - 0.01);
+  else if (solver_wrapper->solver->energy->lambda >= 0.1)
+    update_energy_param(Param::LAMBDA, solver_wrapper->solver->energy->lambda - 0.1);
+
+  info.GetReturnValue().Set(Nan::New<v8::Number>(solver_wrapper->solver->energy->lambda));
+}
+
+NAN_METHOD(increaseDelta) {
+  update_energy_param(Param::DELTA, solver_wrapper->solver->energy->separation->delta * 2.0);
+
+  info.GetReturnValue().Set(Nan::New<v8::Number>(solver_wrapper->solver->energy->separation->delta));
+}
+
+NAN_METHOD(decreaseDelta) {
+  update_energy_param(Param::DELTA, solver_wrapper->solver->energy->separation->delta * 0.5);
+
+  info.GetReturnValue().Set(Nan::New<v8::Number>(solver_wrapper->solver->energy->separation->delta));
+}
+
 void Init(v8::Local<v8::Object> exports) {
     NAN_EXPORT(exports, loadMeshWithSoup);
     NAN_EXPORT(exports, startSolver);
     NAN_EXPORT(exports, solverProgressed);
     NAN_EXPORT(exports, getUpdatedMesh);
+    NAN_EXPORT(exports, increaseLambda);
+    NAN_EXPORT(exports, decreaseLambda);
+    NAN_EXPORT(exports, increaseDelta);
+    NAN_EXPORT(exports, decreaseDelta);
 }
 
 NODE_MODULE(addon, Init)

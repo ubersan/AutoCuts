@@ -65,6 +65,9 @@ export class CanvasComponent implements OnInit {
 
   drawingOption = "camera";
 
+  lambda = 0.0;
+  delta = 1.0;
+
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -248,7 +251,10 @@ export class CanvasComponent implements OnInit {
     this.light2d = new THREE.AmbientLight(0xffffff);
 
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableKeys = false;
+
     this.controls2d = new THREE.OrbitControls(this.camera2d, this.renderer2d.domElement);
+    this.controls2d.enableKeys = false;
     this.controls2d.enableRotate = false;
 
     this.createScene();
@@ -265,8 +271,26 @@ export class CanvasComponent implements OnInit {
     this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
   }
 
+  // TODO: only listens when canvas is clicked.
   @HostListener('window:keypress', ['$event']) keyPressed(event: KeyboardEvent) {
     console.log('key = ', event.key);
+    switch (event.key) {
+      case 'w': {
+        this.lambda = myAddon.increaseLambda();
+        break;
+      }
+      case 's': {
+        this.lambda = myAddon.decreaseLambda();
+        break;
+      }
+      case 'a': {
+        this.delta = myAddon.decreaseDelta();
+        break;
+      }
+      case 'd': {
+        this.delta = myAddon.increaseDelta();
+      }
+    }
   }
 
   createScene() {
@@ -293,13 +317,6 @@ export class CanvasComponent implements OnInit {
     requestAnimationFrame(() => this.animate());
 
     if (myAddon.solverProgressed()) {
-      // var updated2dVertices = myAddon.getUpdatedMesh();
-      // var numVerts = updated2dVertices[0][0]; // todo: stays the same, dont repeat here
-      // for (var i = 0; i < numVerts; ++i) {
-      //   var v = updated2dVertices[i + 1];
-      //   this.model2dGeometry.vertices[i] = new THREE.Vector3(v[0], v[1], v[2]);
-      // }
-      // this.model2dGeometry.verticesNeedUpdate = true;
       var updated2dVertices = myAddon.getUpdatedMesh();
       this.scene2d.remove(this.mesh2d);
       var geo = new THREE.Geometry();
@@ -313,8 +330,15 @@ export class CanvasComponent implements OnInit {
         geo.vertices[i].y = v[1];
         geo.vertices[i].z = v[2];
       }
-      //geo.normalize();
       var newmesh = new THREE.Mesh(geo, [this.modelMaterial2d, this.selectMaterial2d]);
+
+      var geo2d = new THREE.EdgesGeometry(geo);
+      var mat2d = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
+      this.wireframe2dMesh = new THREE.LineSegments(geo2d, mat2d);
+      if (this.showWireframe) {
+        newmesh.add(this.wireframe2dMesh);
+      }
+
       this.mesh2d = newmesh;
       this.scene2d.add(this.mesh2d);
     }
