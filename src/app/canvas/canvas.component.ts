@@ -59,7 +59,7 @@ export class CanvasComponent implements OnInit {
   mouse = new THREE.Vector2();
 
   // mesh to load on startup
-  meshFileName = 'C:\\Users\\Sandro\\Documents\\libigl\\tutorial\\shared\\cube.off';
+  meshFileName = 'C:\\meshes\\cube.off';
 
   hitfaceIndex = null;
 
