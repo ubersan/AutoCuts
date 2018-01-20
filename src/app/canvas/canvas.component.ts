@@ -68,6 +68,8 @@ export class CanvasComponent implements OnInit {
   lambda = 0.0;
   delta = 1.0;
 
+  resizeActive = false;
+
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -104,10 +106,36 @@ export class CanvasComponent implements OnInit {
     this.subscription.unsubscribe();
   }
 
+  // TODO: Why not @HostListener
+
+ /* var sz = this.renderer.getSize();
+  var middleX = this.sidenav._width + sz.width;
+  if (Math.abs(middleX - event.clientX) < 10) {
+    this.moveActive = true;
+    console.log('on');
+  }
+  else {
+    this.moveActive = false;
+    console.log('off');
+  }*/
+
   subscribe() {
     this.subscription = Observable.fromEvent(this.renderer.domElement, 'mousedown')
       .subscribe(e => {
+
         var mouseevent = e as MouseEvent;
+
+        // only works when "SELECT" is chosen --> not what we want
+
+        /*var middleX = this.sidenav._width + this.renderer.getSize().width;
+        console.log('middlex = ', middleX);
+        console.log('clientx = ', mouseevent.clientX);
+        if (Math.abs(middleX - mouseevent.clientX) < 10) {
+          this.resizeActive = true;
+          console.log('resize = true');
+          return;
+        }*/
+        
         this.mouse.x = ((mouseevent.clientX - this.sidenav._width) / this.renderer.domElement.clientWidth) * 2 - 1;
         this.mouse.y = - (mouseevent.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -121,6 +149,20 @@ export class CanvasComponent implements OnInit {
           this.hitfaceIndex = null;
         }
       });
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  onMouseUp(event: MouseEvent) {
+    console.log('resizeactive = false');
+    this.resizeActive = false;
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent) {
+    if (!this.resizeActive) {
+      return;
+    }
+    event.cancelBubble = false;
   }
 
   // TODO: minus header bar
