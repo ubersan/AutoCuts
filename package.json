@@ -1,6 +1,8 @@
 {
   "name": "auto-cuts",
-  "version": "0.0.0",
+  "productName": "AutoCuts",
+  "description": "Standalone AutoCuts App",
+  "version": "0.0.1",
   "license": "MIT",
   "main": "main.js",
   "scripts": {
@@ -12,7 +14,8 @@
     "e2e": "ng e2e",
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
-    "pack-win32": "electron-packager . --platform=win32"
+    "pack-win32": "electron-packager . --platform=win32",
+    "installer-win32": "node installers/windows/createinstaller.js"
   },
   "private": true,
   "dependencies": {
@@ -43,6 +46,7 @@
     "codelyzer": "^4.0.1",
     "electron": "^1.7.10",
     "electron-packager": "^10.1.0",
+    "electron-winstaller": "^2.6.4",
     "jasmine-core": "~2.6.2",
     "jasmine-spec-reporter": "~4.1.0",
     "karma": "~1.7.0",
