@@ -127,8 +127,8 @@ export class CanvasComponent implements OnInit {
   verticalMinus = 0;
 
   ngAfterViewInit() {
-    this.renderer.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
-    this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
+    this.renderer.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
+    this.renderer2d.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
 
     this.sidenavcontent.nativeElement.appendChild(this.renderer.domElement);
     this.sidenavcontent.nativeElement.appendChild(this.renderer2d.domElement);
@@ -167,10 +167,10 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
+    this.camera = new THREE.PerspectiveCamera(40, ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera.position.z = 3;
 
-    this.camera2d = new THREE.PerspectiveCamera(40, (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
+    this.camera2d = new THREE.PerspectiveCamera(40, ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera2d.position.z = 3;
 
     this.modelMaterial = new THREE.MeshPhongMaterial( {
@@ -261,14 +261,14 @@ export class CanvasComponent implements OnInit {
   }
 
   @HostListener('window:resize') onResize() {
-    this.camera.aspect = (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus);
+    this.camera.aspect = ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus);
     this.camera.updateProjectionMatrix();
 
-    this.camera2d.aspect = (window.innerWidth / 2) / (window.innerHeight - this.verticalMinus);
+    this.camera2d.aspect = ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus);
     this.camera2d.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
-    this.renderer2d.setSize(window.innerWidth / 2, window.innerHeight - this.verticalMinus);
+    this.renderer.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
+    this.renderer2d.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
   }
 
   // TODO: only listens when canvas is clicked.
