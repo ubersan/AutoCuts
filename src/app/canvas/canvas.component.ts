@@ -60,6 +60,7 @@ export class CanvasComponent implements OnInit {
 
   // mesh to load on startup
   meshFileName = 'C:\\meshes\\cube.off';
+  meshWasLoaded = false;
   //meshFileName = null;
 
   hitfaceIndex = null;
@@ -176,6 +177,7 @@ export class CanvasComponent implements OnInit {
       ]
     },
     files => this.callback_loadMesh(files));
+    this.meshWasLoaded = true;
   }
 
   callback_loadMesh(files: string[]) {
@@ -322,7 +324,7 @@ export class CanvasComponent implements OnInit {
   createScene() {
     this.scene = new THREE.Scene();
 
-    if (this.meshFileName) {
+    if (this.meshFileName && this.meshWasLoaded) {
       this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
       if (this.showWireframe) {
         this.mesh.add(this.wireframeMesh);
@@ -335,7 +337,7 @@ export class CanvasComponent implements OnInit {
 
     this.scene2d = new THREE.Scene();
 
-    if (this.meshFileName) {
+    if (this.meshFileName && this.meshWasLoaded) {
       this.mesh2d = new THREE.Mesh(this.model2dGeometry, [this.modelMaterial2d, this.selectMaterial2d]);
       if (this.showWireframe) {
         this.mesh2d.add(this.wireframe2dMesh);
