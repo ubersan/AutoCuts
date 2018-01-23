@@ -58,10 +58,8 @@ export class CanvasComponent implements OnInit {
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
 
-  // mesh to load on startup
-  meshFileName = 'C:\\meshes\\cube.off';
-  meshWasLoaded = false;
-  //meshFileName = null;
+  // start with empty mesh
+  meshFileName = null;
 
   hitfaceIndex = null;
 
@@ -177,7 +175,6 @@ export class CanvasComponent implements OnInit {
       ]
     },
     files => this.callback_loadMesh(files));
-    this.meshWasLoaded = true;
   }
 
   callback_loadMesh(files: string[]) {
@@ -211,28 +208,28 @@ export class CanvasComponent implements OnInit {
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1
       });
-
+  
       this.selectMaterial = new THREE.MeshPhongMaterial( {
         color: 0xff0000,
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1
       });
-
+  
       this.modelMaterial2d = new THREE.MeshPhongMaterial( {
         color: 0xffffff,
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1
       });
-
+  
       this.selectMaterial2d = new THREE.MeshPhongMaterial( {
         color: 0xff0000,
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1
       });
-    
+
       var loadedMesh = myAddon.loadMeshWithSoup(this.meshFileName);
 
       var numVertices = loadedMesh[0][0];
@@ -324,7 +321,7 @@ export class CanvasComponent implements OnInit {
   createScene() {
     this.scene = new THREE.Scene();
 
-    if (this.meshFileName && this.meshWasLoaded) {
+    if (this.meshFileName) {
       this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
       if (this.showWireframe) {
         this.mesh.add(this.wireframeMesh);
@@ -337,7 +334,7 @@ export class CanvasComponent implements OnInit {
 
     this.scene2d = new THREE.Scene();
 
-    if (this.meshFileName && this.meshWasLoaded) {
+    if (this.meshFileName) {
       this.mesh2d = new THREE.Mesh(this.model2dGeometry, [this.modelMaterial2d, this.selectMaterial2d]);
       if (this.showWireframe) {
         this.mesh2d.add(this.wireframe2dMesh);
@@ -352,7 +349,8 @@ export class CanvasComponent implements OnInit {
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    if (myAddon.solverProgressed()) {
+    // TODO: Solver should always be queriable (not only after a mesh has been loaded)
+    if (this.meshFileName && myAddon.solverProgressed()) {
       var updated2dVertices = myAddon.getUpdatedMesh();
       this.scene2d.remove(this.mesh2d);
       var geo = new THREE.Geometry();
