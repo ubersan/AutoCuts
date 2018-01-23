@@ -15,7 +15,8 @@ import { MatSidenav } from '@angular/material';
 })
 export class CanvasComponent implements OnInit {
   @ViewChild('sidenav') sidenav: MatSidenav;
-  @ViewChild('sidenavcontent') sidenavcontent: ElementRef;
+  @ViewChild('plot3d') plot3d: ElementRef;
+  @ViewChild('plot2d') plot2d: ElementRef;
 
   subscription: Subscription;
 
@@ -69,6 +70,10 @@ export class CanvasComponent implements OnInit {
   delta = 1.0;
 
   resizeActive = false;
+
+  renderHeight = 0;
+
+  pixelsToTheLeft = 0;
 
   constructor(private _electronService: ElectronService) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -136,7 +141,9 @@ export class CanvasComponent implements OnInit {
           return;
         }*/
         
-        this.mouse.x = ((mouseevent.clientX - this.sidenav._width) / this.renderer.domElement.clientWidth) * 2 - 1;
+
+        // TODO: What to do when rescaled? look @ pixelsToTheLeft
+        this.mouse.x = ((mouseevent.clientX - (this.sidenav._width + 20)) / this.renderer.domElement.clientWidth) * 2 - 1;
         this.mouse.y = - (mouseevent.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -155,11 +162,17 @@ export class CanvasComponent implements OnInit {
   verticalMinus = 0;
 
   ngAfterViewInit() {
-    this.renderer.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
-    this.renderer2d.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
+    this.renderHeight = window.innerHeight - this.verticalMinus;
 
-    this.sidenavcontent.nativeElement.appendChild(this.renderer.domElement);
-    this.sidenavcontent.nativeElement.appendChild(this.renderer2d.domElement);
+    this.renderer.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 - this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
+    this.renderer2d.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 + this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
+
+    //this.sidenavcontent.nativeElement.appendChild(this.renderer.domElement);
+    this.plot3d.nativeElement.appendChild(this.renderer.domElement);
+    //this.sidenavcontent.nativeElement.appendChild(this.renderer2d.domElement);
+    this.plot2d.nativeElement.appendChild(this.renderer2d.domElement);
+
+    console.log('height: ', window.innerHeight - this.verticalMinus);
   }
 
   toggleWireframe() {
@@ -195,10 +208,10 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera(40, ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
+    this.camera = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) - this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera.position.z = 3;
 
-    this.camera2d = new THREE.PerspectiveCamera(40, ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
+    this.camera2d = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) + this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
     this.camera2d.position.z = 3;
 
     if (this.meshFileName) {
@@ -286,14 +299,16 @@ export class CanvasComponent implements OnInit {
   }
 
   @HostListener('window:resize') onResize() {
-    this.camera.aspect = ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus);
+    this.camera.aspect = (((window.innerWidth - (this.sidenav._width + 20)) / 2) - this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus);
     this.camera.updateProjectionMatrix();
 
-    this.camera2d.aspect = ((window.innerWidth - this.sidenav._width) / 2) / (window.innerHeight - this.verticalMinus);
+    this.camera2d.aspect = (((window.innerWidth - (this.sidenav._width + 20)) / 2) + this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus);
     this.camera2d.updateProjectionMatrix();
 
-    this.renderer.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
-    this.renderer2d.setSize((window.innerWidth - this.sidenav._width) / 2, window.innerHeight - this.verticalMinus);
+    this.renderer.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 - this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
+    this.renderer2d.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 + this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
+
+    this.renderHeight = window.innerHeight - this.verticalMinus;
   }
 
   // TODO: only listens when canvas is clicked.
@@ -379,5 +394,28 @@ export class CanvasComponent implements OnInit {
 
     this.renderer.render(this.scene, this.camera);
     this.renderer2d.render(this.scene2d, this.camera2d);
+  }
+
+  movebarActive = false;
+  lastPos: MouseEvent;
+
+  mouseDownBar(event: MouseEvent) {
+    console.log("down");
+    this.movebarActive = true;
+    this.lastPos = event;
+  }
+
+  mouseUpBar() {
+    console.log("up");
+    this.movebarActive = false;
+  }
+
+  mouseMoveBar(event: MouseEvent) {
+    if (this.movebarActive) {
+      var diffx = this.lastPos.clientX - event.clientX;
+      this.pixelsToTheLeft = this.pixelsToTheLeft + diffx;
+      this.onResize();
+      this.lastPos = event;
+    }
   }
 }
