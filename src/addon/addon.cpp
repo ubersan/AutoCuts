@@ -45,6 +45,21 @@ NAN_METHOD(loadMeshWithSoup) {
     F = F_read;
   }
 
+  // normalize [0, 1] vertex coordinates and centralize them [-0.5, 0.5]
+  double xDist = V.col(0).maxCoeff() - V.col(0).minCoeff();
+  double yDist = V.col(1).maxCoeff() - V.col(1).minCoeff();
+  double zDist = V.col(2).maxCoeff() - V.col(2).minCoeff();
+
+  double maxDist = max(max(xDist, yDist), zDist);
+
+  V.col(0).array() /= maxDist;
+  V.col(1).array() /= maxDist;
+  V.col(2).array() /= maxDist;
+
+  V.col(0).array() -= V.col(0).mean();
+  V.col(1).array() -= V.col(1).mean();
+  V.col(2).array() -= V.col(2).mean();
+
   solver_wrapper = new SolverWrapper();
   solver_wrapper->init(V, F, V, F, Utils::Init::RANDOM);
   MatX2 Vs = solver_wrapper->solver->Vs;
