@@ -111,39 +111,12 @@ export class CanvasComponent implements OnInit {
     this.subscription.unsubscribe();
   }
 
-  // TODO: Why not @HostListener
-
- /* var sz = this.renderer.getSize();
-  var middleX = this.sidenav._width + sz.width;
-  if (Math.abs(middleX - event.clientX) < 10) {
-    this.moveActive = true;
-    console.log('on');
-  }
-  else {
-    this.moveActive = false;
-    console.log('off');
-  }*/
-
   subscribe() {
     this.subscription = Observable.fromEvent(this.renderer.domElement, 'mousedown')
       .subscribe(e => {
 
         var mouseevent = e as MouseEvent;
-
-        // only works when "SELECT" is chosen --> not what we want
-
-        /*var middleX = this.sidenav._width + this.renderer.getSize().width;
-        console.log('middlex = ', middleX);
-        console.log('clientx = ', mouseevent.clientX);
-        if (Math.abs(middleX - mouseevent.clientX) < 10) {
-          this.resizeActive = true;
-          console.log('resize = true');
-          return;
-        }*/
-        
-
-        // TODO: What to do when rescaled? look @ pixelsToTheLeft
-        this.mouse.x = ((mouseevent.clientX - (this.sidenav._width + 20)) / this.renderer.domElement.clientWidth) * 2 - 1;
+        this.mouse.x = (((mouseevent.clientX - (this.sidenav._width + 20)) - this.pixelsToTheLeft) / this.renderer.domElement.clientWidth) * 2 - 1;
         this.mouse.y = - (mouseevent.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -167,9 +140,7 @@ export class CanvasComponent implements OnInit {
     this.renderer.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 - this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
     this.renderer2d.setSize((window.innerWidth - (this.sidenav._width + 20)) / 2 + this.pixelsToTheLeft, window.innerHeight - this.verticalMinus);
 
-    //this.sidenavcontent.nativeElement.appendChild(this.renderer.domElement);
     this.plot3d.nativeElement.appendChild(this.renderer.domElement);
-    //this.sidenavcontent.nativeElement.appendChild(this.renderer2d.domElement);
     this.plot2d.nativeElement.appendChild(this.renderer2d.domElement);
 
     console.log('height: ', window.innerHeight - this.verticalMinus);
@@ -208,10 +179,10 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.camera = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) - this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
-    this.camera.position.z = 3;
+    this.camera = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) - this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.1, 1000);
+    this.camera.position.z = 2;
 
-    this.camera2d = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) + this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.001, 10000);
+    this.camera2d = new THREE.PerspectiveCamera(40, (((window.innerWidth - (this.sidenav._width + 20)) / 2) + this.pixelsToTheLeft) / (window.innerHeight - this.verticalMinus), 0.1, 1000);
     this.camera2d.position.z = 3;
 
     if (this.meshFileName) {
@@ -250,16 +221,23 @@ export class CanvasComponent implements OnInit {
       var numSoupVertices = loadedMesh[0][2];
       var numSoupFaces = loadedMesh[0][3];
 
-      this.modelGeometry = new THREE.Geometry();
-      for (var i = 0; i < numVertices; ++i) {
-        var v = loadedMesh[i + 1];
-        this.modelGeometry.vertices.push(new THREE.Vector3(v[0], v[1], v[2]));
-      }
-
-      for (var i = 0; i < numFaces; ++i) {
+      var geometry = new THREE.BufferGeometry();
+      var positions = [];
+      for ( var i = 0; i < numFaces; i ++ ) {
+        // positions
         var f = loadedMesh[i + 1 + numVertices];
-        this.modelGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
+        var v0 = loadedMesh[f[0] + 1];
+        var v1 = loadedMesh[f[1] + 1];
+        var v2 = loadedMesh[f[2] + 1];
+        positions.push( v0[0], v0[1], v0[2] );
+        positions.push( v1[0], v1[1], v1[2] );
+        positions.push( v2[0], v2[1], v2[2] );
       }
+      var positionAttribute = new THREE.Float32BufferAttribute( positions, 3 );
+      geometry.addAttribute( 'position', positionAttribute );
+      geometry.computeBoundingSphere();
+      
+      this.modelGeometry = geometry;
 
       this.model2dGeometry = new THREE.Geometry();
       this.modelGeometry.dynamic = true;
@@ -273,12 +251,12 @@ export class CanvasComponent implements OnInit {
         this.model2dGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
       }
 
-      this.modelGeometry.normalize();
+      //this.modelGeometry.normalize();
       this.model2dGeometry.normalize();
 
-      var geo = new THREE.EdgesGeometry(this.modelGeometry);
-      var mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
-      this.wireframeMesh = new THREE.LineSegments(geo, mat);
+      //var geo = new THREE.EdgesGeometry(this.modelGeometry);
+      //var mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
+      //this.wireframeMesh = new THREE.LineSegments(geo, mat);
 
       var geo2d = new THREE.EdgesGeometry(this.model2dGeometry);
       var mat2d = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
@@ -337,10 +315,23 @@ export class CanvasComponent implements OnInit {
     this.scene = new THREE.Scene();
 
     if (this.meshFileName) {
-      this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
+      /*this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
       if (this.showWireframe) {
-        this.mesh.add(this.wireframeMesh);
-      }
+       // this.mesh.add(this.wireframeMesh);
+      }*/
+      //var material = new THREE.MeshPhongMaterial();
+      var darkMaterial = new THREE.MeshBasicMaterial();
+      var wireframeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        wireframe: true,
+        transparent: true,
+        polygonOffset: true,
+        polygonOffsetFactor: -10.0,
+        polygonOffsetUnits: -40.0
+      }); 
+      var multiMaterial = [ darkMaterial, wireframeMaterial ]; 
+      //this.mesh = new THREE.Mesh( this.modelGeometry, darkMaterial );
+      this.mesh = THREE.SceneUtils.createMultiMaterialObject(this.modelGeometry, multiMaterial);
       this.scene.add(this.mesh);
     }
 
@@ -400,16 +391,15 @@ export class CanvasComponent implements OnInit {
   lastPos: MouseEvent;
 
   mouseDownBar(event: MouseEvent) {
-    console.log("down");
     this.movebarActive = true;
     this.lastPos = event;
   }
 
   mouseUpBar() {
-    console.log("up");
     this.movebarActive = false;
   }
 
+  // TODO: Subscribe this as well, so we can use whole screen and no focus is lost when moving fast
   mouseMoveBar(event: MouseEvent) {
     if (this.movebarActive) {
       var diffx = this.lastPos.clientX - event.clientX;
