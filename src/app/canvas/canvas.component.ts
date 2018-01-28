@@ -17,8 +17,10 @@ export class CanvasComponent implements OnInit {
   @ViewChild('sidenav') sidenav: MatSidenav;
   @ViewChild('plot3d') plot3d: ElementRef;
   @ViewChild('plot2d') plot2d: ElementRef;
+  @ViewChild('sidenavcontent') sidenavContent: ElementRef;
 
-  subscription: any;
+  selectFacesubscription: any;
+  zoomCircleSubscription: any;
   midbarSubscription: any;
 
   mesh: any;
@@ -93,6 +95,15 @@ export class CanvasComponent implements OnInit {
         this.controls2d.enabled = true;
         break;
       }
+      case "draw": {
+        this.drawingOption = "draw";
+        this.unsubscribe();
+        this.controls.enabled = false;
+        this.controls2d.enabled = false;
+        this.subscribeDraw();
+        break;
+      }
+      case "drag":
       case "select": {
         this.drawingOption = "select";
         this.subscribe();
@@ -109,11 +120,13 @@ export class CanvasComponent implements OnInit {
   }
 
   unsubscribe() {
-    this.subscription.unsubscribe();
+    if (this.selectFacesubscription) {
+      this.selectFacesubscription.unsubscribe();
+    }
   }
 
   subscribe() {
-    this.subscription = Observable.fromEvent(this.renderer.domElement, 'mousedown')
+    this.selectFacesubscription = Observable.fromEvent(this.renderer.domElement, 'mousedown')
       .subscribe(e => {
 
         var mouseevent = e as MouseEvent;
@@ -132,6 +145,25 @@ export class CanvasComponent implements OnInit {
       });
   }
 
+  subscribeDraw() {
+    console.log('subd');
+    this.zoomCircleSubscription = Observable.fromEvent(this.renderer.domElement, 'scroll')
+      .subscribe(e => {
+        console.log('e: ', e);
+      });
+  }
+
+  drawRadius = 0.25;
+  drawRadiusChanged(e) {
+    this.drawRadius = e.value;
+
+    this.scene.remove(this.circle);
+    var circlegeo = new THREE.CircleGeometry(this.drawRadius, 32);
+    var circlemat = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+    this.circle = new THREE.Mesh(circlegeo, circlemat);
+    this.scene.add(this.circle);
+  }
+
   // TODO: minus header bar
   verticalMinus = 0;
 
@@ -143,8 +175,6 @@ export class CanvasComponent implements OnInit {
 
     this.plot3d.nativeElement.appendChild(this.renderer.domElement);
     this.plot2d.nativeElement.appendChild(this.renderer2d.domElement);
-
-    console.log('height: ', window.innerHeight - this.verticalMinus);
   }
 
   toggleWireframe() {
@@ -225,7 +255,6 @@ export class CanvasComponent implements OnInit {
       var geometry = new THREE.BufferGeometry();
       var positions = [];
       for ( var i = 0; i < numFaces; i ++ ) {
-        // positions
         var f = loadedMesh[i + 1 + numVertices];
         var v0 = loadedMesh[f[0] + 1];
         var v1 = loadedMesh[f[1] + 1];
@@ -234,8 +263,9 @@ export class CanvasComponent implements OnInit {
         positions.push( v1[0], v1[1], v1[2] );
         positions.push( v2[0], v2[1], v2[2] );
       }
+
       var positionAttribute = new THREE.Float32BufferAttribute( positions, 3 );
-      geometry.addAttribute( 'position', positionAttribute );
+      geometry.addAttribute('position', positionAttribute);
       geometry.computeBoundingSphere();
       
       this.modelGeometry = geometry;
@@ -252,12 +282,7 @@ export class CanvasComponent implements OnInit {
         this.model2dGeometry.faces.push(new THREE.Face3(f[0], f[1], f[2]));
       }
 
-      //this.modelGeometry.normalize();
       this.model2dGeometry.normalize();
-
-      //var geo = new THREE.EdgesGeometry(this.modelGeometry);
-      //var mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
-      //this.wireframeMesh = new THREE.LineSegments(geo, mat);
 
       var geo2d = new THREE.EdgesGeometry(this.model2dGeometry);
       var mat2d = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1});
@@ -316,11 +341,6 @@ export class CanvasComponent implements OnInit {
     this.scene = new THREE.Scene();
 
     if (this.meshFileName) {
-      /*this.mesh = new THREE.Mesh(this.modelGeometry, [this.modelMaterial, this.selectMaterial]);
-      if (this.showWireframe) {
-       // this.mesh.add(this.wireframeMesh);
-      }*/
-      //var material = new THREE.MeshPhongMaterial();
       var darkMaterial = new THREE.MeshBasicMaterial();
       var wireframeMaterial = new THREE.MeshBasicMaterial({
         color: 0x000000,
@@ -331,9 +351,9 @@ export class CanvasComponent implements OnInit {
         polygonOffsetUnits: -40.0
       }); 
       var multiMaterial = [ darkMaterial, wireframeMaterial ]; 
-      //this.mesh = new THREE.Mesh( this.modelGeometry, darkMaterial );
       this.mesh = THREE.SceneUtils.createMultiMaterialObject(this.modelGeometry, multiMaterial);
       this.scene.add(this.mesh);
+      
     }
 
     this.scene.add(this.light);
@@ -351,7 +371,14 @@ export class CanvasComponent implements OnInit {
 
     this.scene2d.add(this.light2d);
     this.scene2d.background = new THREE.Color(0xaeaeae);
+
+    var circlegeo = new THREE.CircleGeometry(this.drawRadius, 32);
+    var circlemat = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+    this.circle = new THREE.Mesh(circlegeo, circlemat);
+    this.scene.add(this.circle);
   }
+
+  circle: any;
 
   animate() {
     requestAnimationFrame(() => this.animate());

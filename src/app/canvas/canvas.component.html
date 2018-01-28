@@ -6,8 +6,11 @@
       <mat-select [(value)]="drawingOption" (change)="selectChanged($event)">
         <mat-option value="camera">Camera</mat-option>
         <mat-option value="select">Select</mat-option>
+        <mat-option value="draw">Draw</mat-option>
+        <mat-option value="drag">Drag</mat-option>
       </mat-select>
     </mat-form-field>
+    <p><mat-slider [min]="0.01" [max]="1" [step]="0.01" [tick-interval]="0.1" [thumb-label]="true" [(ngModel)]="drawRadius" (input)="drawRadiusChanged($event)"></mat-slider></p>
     <p><button mat-button (click)="startSolver()">Start Solver</button></p>
     <p><button mat-button (click)="stopSolver()">Stop Solver</button></p>
    <p><mat-form-field>
@@ -16,9 +19,6 @@
     <p><mat-form-field>
       <input matInput placeholder="Delta" [(value)]="delta">
     </mat-form-field></p>
-
-    <!--p><button mat-button (click)="sidenav.toggle()" color="primary" style="position: absolute; top: 50%; left: 20px; z-index: 42;">Toggle Nav</button></p-->
-
   </mat-sidenav>
 
   <div #sidenavcontent style="display: flex; overflow: hidden; z-index: 2">
