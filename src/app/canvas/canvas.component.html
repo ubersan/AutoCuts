@@ -23,11 +23,11 @@
 
   <div #sidenavcontent style="display: flex; overflow: hidden; z-index: 2">
     <div #plot3d style="overflow:hidden;z-index:2" [style.height.px]="renderHeight"></div>
-    <div style="background-color:dimgrey;overflow: hidden;z-index:2;width:20px;"
+    <div style="background-color:dimgrey;overflow: hidden;z-index:2;width:20px;cursor:default;"
         [style.height.px]="renderHeight"
         (mousedown)="mouseDownBar($event)"
         (mouseup)="mouseUpBar()">
-      </div>
+    </div>
     <div #plot2d style="overflow:hidden;z-index:2" [style.height.px]="renderHeight"></div>
   </div>
 </mat-sidenav-container>
