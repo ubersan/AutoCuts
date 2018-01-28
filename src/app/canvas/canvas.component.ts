@@ -18,7 +18,8 @@ export class CanvasComponent implements OnInit {
   @ViewChild('plot3d') plot3d: ElementRef;
   @ViewChild('plot2d') plot2d: ElementRef;
 
-  subscription: Subscription;
+  subscription: any;
+  midbarSubscription: any;
 
   mesh: any;
   mesh2d: any;
@@ -393,19 +394,19 @@ export class CanvasComponent implements OnInit {
   mouseDownBar(event: MouseEvent) {
     this.movebarActive = true;
     this.lastPos = event;
+
+    this.midbarSubscription = Observable.fromEvent(document, 'mousemove')
+      .subscribe(e => {
+        var mouseevent = e as MouseEvent;
+        var diffx = this.lastPos.clientX - mouseevent.clientX;
+        this.pixelsToTheLeft = this.pixelsToTheLeft + diffx;
+        this.onResize();
+        this.lastPos = mouseevent;
+      });
   }
 
   mouseUpBar() {
     this.movebarActive = false;
-  }
-
-  // TODO: Subscribe this as well, so we can use whole screen and no focus is lost when moving fast
-  mouseMoveBar(event: MouseEvent) {
-    if (this.movebarActive) {
-      var diffx = this.lastPos.clientX - event.clientX;
-      this.pixelsToTheLeft = this.pixelsToTheLeft + diffx;
-      this.onResize();
-      this.lastPos = event;
-    }
+    this.midbarSubscription.unsubscribe();
   }
 }

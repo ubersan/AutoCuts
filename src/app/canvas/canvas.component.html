@@ -26,8 +26,7 @@
     <div style="background-color:dimgrey;overflow: hidden;z-index:2;width:20px;"
         [style.height.px]="renderHeight"
         (mousedown)="mouseDownBar($event)"
-        (mouseup)="mouseUpBar()"
-        (mousemove)="mouseMoveBar($event)">
+        (mouseup)="mouseUpBar()">
       </div>
     <div #plot2d style="overflow:hidden;z-index:2" [style.height.px]="renderHeight"></div>
   </div>
