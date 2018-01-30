@@ -14,11 +14,12 @@
     "e2e": "ng e2e",
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
-    "pack-win32": "electron-packager . --platform=win32",
+    "pack-win32": "electron-packager . --platform=win32 --arch=x64 --overwrite",
     "installer-win32": "node installers/windows/createinstaller.js"
   },
   "private": true,
   "dependencies": {
+    "@angular-devkit/core": "0.0.29",
     "@angular/animations": "^5.1.2",
     "@angular/cdk": "^5.0.2",
     "@angular/common": "^5.0.0",
