@@ -20,8 +20,9 @@
       ],
       "scripts": [
         "myjslib.js",
-        "../../../three.js-master-r89/build/three.min.js",
-        "../../../three.js-master-r89/examples/js/controls/OrbitControls.js"
+        "../node_modules/three/build/three.min.js",
+        "../node_modules/three/examples/js/controls/OrbitControls.js",
+        "../node_modules/three/examples/js/utils/SceneUtils.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {
