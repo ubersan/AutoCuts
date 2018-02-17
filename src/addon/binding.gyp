@@ -4,7 +4,6 @@
       "target_name": "addon",
       "sources": [
         "addon.cpp",
-        "src/ImportMesh.cpp",
         "src/BBox.cpp",
         "src/Energy.cpp",
         "src/EnergySymDir.cpp",

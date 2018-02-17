@@ -4,7 +4,5 @@ interface NodeModule {
   id: string;
 }
 
-declare var testOut: any;
 declare var myAddon: any;
-
 declare var THREE: any;

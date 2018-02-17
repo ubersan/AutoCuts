@@ -7,10 +7,4 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
-
-  start() {
-    console.log("start called")
-    testOut();
-    console.log(myAddon.factorial(5))
-  }
 }
