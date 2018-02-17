@@ -19,8 +19,6 @@ function createWindow () {
     height: 950,
     backgroundColor: '#ffffff',
     icon: `file://${__dirname}/dist/assets/logo.png`,
-    //skipTaskbar: true,
-    //toolbar: false
   })
 
   mainWindow.setMenu(null);
@@ -37,6 +35,8 @@ function createWindow () {
     mainWindow = null
   })
 
+  
+  
   /*var menu = Menu.buildFromTemplate([
     {
       label: 'Menu',
