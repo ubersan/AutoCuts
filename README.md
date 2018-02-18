@@ -16,5 +16,10 @@
 - add Preprocessor 'NOMINMAX'
 - change additional include directory entry 'xxx\.node-gyp\iojs-1.8.2\include\node' to 'xxx\.node-gyp\8.2.1\include\node'
 - build
+- cd back to the root directory.
 4. Run 'npm run electron-build' to build and run the app in production mode.
 5. Run 'npm run electron' to just run the built app without rebuilding it.
+
+## Create Windows installer
+1. Run 'npm run pack-win32'.
+2. RUn 'npm run installer-win32'.
