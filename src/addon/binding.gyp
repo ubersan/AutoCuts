@@ -16,8 +16,8 @@
       ],
       "include_dirs": [
           "<!(node -e \"require('nan')\")",
-          "/../../libigl/include",
-          "/../../Eigen-3.3.4",
+          "../../libigl/include",
+          "../../libigl/external/eigen",
           "./hdr",
        ],
       'cflags_cc!': ['/openmp'],
