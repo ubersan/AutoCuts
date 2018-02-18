@@ -15,7 +15,6 @@
 - add openmp option
 - add Preprocessor 'NOMINMAX'
 - change additional include directory entry 'xxx\.node-gyp\iojs-1.8.2\include\node' to 'xxx\.node-gyp\8.2.1\include\node'
-- change node header directory (additinal include directories) to correct version 8.2.1 (resides in /User/you/.node-gyp per default on windows)
 - build
 4. Run 'npm run electron-build' to build and run the app in production mode.
 5. Run 'npm run electron' to just run the built app without rebuilding it.
