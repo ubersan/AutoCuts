@@ -6,10 +6,12 @@
 2. Install node: https://nodejs.org/en/. Enter command line and write 'node'. Executing 'process.versions' should give you a list of libraries and their used versions.
 -  Run 'npm install -g node-gyp'. Needed to build c++-code.
 -  Make sure Python is installed (Tested with Python 2.7.13 https://www.python.org/downloads/release/python-2713/).
-3. Move into the local repo and run the 'install.ps1' powershell script. This downloads and installs all needed dependencies.
+3. Move into the local repo and run the 'install.bat' script. This downloads and installs all needed dependencies.
 - cd into /src/addon
 - Run 'node-gyp install 8.2.1'.
-- Run 'node-gyp configure'. This should result in a 'build' folder containing a VS solution 'binding.sln'; open it.
+- Run 'node-gyp configure'. This should result in a 'build' folder containing a VS solution 'binding.sln'
+- Run 'node-gyp rebuild --target=1.8.2 --arch=x64 --dist-url=https://atom.io/download/atom-shell'. This will set the correct electron target version for the addon. The build will fail, this is intended (for now).
+- Open bindings.sln and ...
 - switch to release configuration
 - add openmp option
 - add Preprocessor 'NOMINMAX'
